@@ -1,0 +1,34 @@
+workflows:
+  humai_flutter:
+    name: HumAI Digital Twin - Flutter
+    max_build_duration: 60
+
+    environment:
+      flutter: stable
+
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: main
+          include: true
+
+    scripts:
+      - name: Bootstrap Flutter project if needed
+        script: |
+          if [ ! -d "android" ]; then
+            echo "No android/ folder found, bootstrapping Flutter project..."
+            mv lib lib_src
+            flutter create . --project-name humai_digital_twin --platforms android,ios
+            rm -rf lib
+            mv lib_src lib
+          fi
+
+      - name: Get packages
+        script: flutter pub get
+
+      - name: Build APK
+        script: flutter build apk --release
+
+    artifacts:
+      - build/app/outputs/
